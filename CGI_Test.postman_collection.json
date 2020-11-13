@@ -1,0 +1,333 @@
+{
+	"info": {
+		"_postman_id": "5a0ada11-9c9a-47b9-9599-0f93ab04e377",
+		"name": "CGI_Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CreateAccount",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"bankAccountNumber\":100,\r\n    \"customerName\":\"Gnanasekaran Raja\",\r\n    \"initialBalance\":1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateAccount_WithOut_AccountNumber",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \r\n    \"customerName\":\"Gnanasekaran Raja\",\r\n    \"initialBalance\":1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateAccount_WithOut_Name",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"bankAccountNumber\":100,\r\n    \"initialBalance\":1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAccount",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/1000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						"1000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreditTransaction",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/1000/credit/3000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						"1000",
+						"credit",
+						"3000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DebitTransaction",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/1000/debit/100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						"1000",
+						"debit",
+						"100"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllAccount",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllAccount Copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllTransactionHistory",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/100/transactions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						"100",
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

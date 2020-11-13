@@ -1,0 +1,100 @@
+package com.cgi.cgi_test.dto;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.cgi.cgi_test.common.CommonUtility;
+import com.cgi.cgi_test.common.Constants;
+import com.cgi.cgi_test.exception.CGIBankOperationException;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+@Getter
+@Setter
+@Slf4j
+public class BankAccount {
+	
+	private Integer accountNumber;
+	private String name;
+	private Double balance;
+	private LocalDateTime createdTime;
+	private LocalDateTime modifiedTime;
+	private List<Transaction> transactionList = new ArrayList<>();
+	private Lock lock = new ReentrantLock();
+	
+	public void addTransaction(Transaction transaction){
+		transactionList.add(transaction);
+	}
+	
+	// It is used for credit transaction
+	public boolean creditTransaction(Double amount) throws InterruptedException{
+		log.info("Begin credit Transaction");
+		boolean status=false;
+		
+		if(lock.tryLock(5,TimeUnit.SECONDS)){
+			try{
+				balance = balance +amount;
+				Transaction transaction = new Transaction();
+				transaction.setTransactionId(CommonUtility.generateTransactionID(Constants.CREDIT));
+				transaction.setAccountNumber(accountNumber);
+				transaction.setAmount(amount);
+				transaction.setCreatedTime(LocalDateTime.now());
+				transaction.setTransactionType(Constants.CREDIT);
+				transaction.setBalance(balance);
+				addTransaction(transaction);
+				status=true;
+				log.info(amount+" credited into account"+accountNumber+" successfully");
+			}finally{
+				lock.unlock();
+				log.info("Lock released");
+			}
+		}else{
+			log.error(amount+" not credited into account"+accountNumber+" due to lock acquired by other thread");
+		}
+		log.info("End credit Transaction");
+		
+		return status;
+	}
+	
+	// It is used for debit transaction
+	public boolean debitTransaction(Double amount) throws InterruptedException, CGIBankOperationException{
+		log.info("Begin debit Transaction");
+		boolean status=false;
+		
+		if(lock.tryLock(5,TimeUnit.SECONDS)){
+			try{
+				if(balance > amount){
+					balance = balance-amount;
+					Transaction transaction = new Transaction();
+					transaction.setTransactionId(CommonUtility.generateTransactionID(Constants.DEBIT));
+					transaction.setAccountNumber(accountNumber);
+					transaction.setAmount(amount);
+					transaction.setCreatedTime(LocalDateTime.now());
+					transaction.setTransactionType(Constants.DEBIT);
+					transaction.setBalance(balance);
+					addTransaction(transaction);
+					status=true;
+					log.debug(amount+" debited into account"+accountNumber+" successfully");
+				}else{
+					log.error(amount+" not debited into account"+accountNumber+" due to insufficient balance");
+					throw new CGIBankOperationException(Constants.CGIE301, amount+" not debited into account"+accountNumber+" due to insufficient balance");
+				}
+			}finally{
+				lock.unlock();
+				log.info("Lock released");
+			}
+		}else{
+			log.error(amount+" not debited into account"+accountNumber+" due to lock acquired by other thread");
+		}
+		log.info("End debit Transaction");
+		
+		return status;
+		
+	}
+}
