@@ -30,7 +30,6 @@ public class BankingOperationsImpl implements BankingOperations {
 
 	@Override
 	public boolean createAccount(AccountRequest bankingRequest) {
-		// TODO Auto-generated method stub
 		log.info("Begin createAccount");
 		boolean flag= false;
 		try{
@@ -52,7 +51,6 @@ public class BankingOperationsImpl implements BankingOperations {
 	
 	@Override
 	public List<AccountResponse> getAccount(Integer accountNumber) throws CGIBankOperationException {
-		// TODO Auto-generated method stub
 		log.info("Begin getAccount");
 		List<AccountResponse> listAccountResponse = new ArrayList<>();
 		if(accountNumber != null){
@@ -61,8 +59,9 @@ public class BankingOperationsImpl implements BankingOperations {
 				listAccountResponse.add(createAccountResponse(bankAccount));
 				return listAccountResponse;
 			}else{
-				log.debug(accountNumber+" Account is not found");
-				throw new CGIBankOperationException("CGIE300","Account is not found");
+				String errorMsg =accountNumber+" account is not found in CGI service";
+				log.debug(errorMsg);
+				throw new CGIBankOperationException(Constants.CGIE300,errorMsg);
 			}
 		}else{
 			listAccountResponse = bankDBStore.getAll().stream().map(account->createAccountResponse(account)).collect(Collectors.toList());
@@ -73,7 +72,6 @@ public class BankingOperationsImpl implements BankingOperations {
 	}
 
 	private AccountResponse createAccountResponse(BankAccount bankAccount) {
-		// TODO Auto-generated method stub
 		AccountResponse accountResponse= new AccountResponse();
 		accountResponse.setBankAccountNumber(bankAccount.getAccountNumber());
 		accountResponse.setCustomerName(bankAccount.getName());
@@ -83,7 +81,6 @@ public class BankingOperationsImpl implements BankingOperations {
 	}
 
 	private Transaction createTransaction(AccountRequest bankingRequest,String transactionType) {
-		// TODO Auto-generated method stub
 		Transaction transaction = new Transaction();
 		transaction.setTransactionId(CommonUtility.generateTransactionID(Constants.CREDIT));
 		transaction.setAccountNumber(bankingRequest.getBankAccountNumber());
@@ -96,7 +93,6 @@ public class BankingOperationsImpl implements BankingOperations {
 	}
 
 	private BankAccount createBankAccount(AccountRequest bankingRequest) {
-		// TODO Auto-generated method stub
 		BankAccount bankAccount = new BankAccount();
 		bankAccount.setAccountNumber(bankingRequest.getBankAccountNumber());
 		bankAccount.setName(bankingRequest.getCustomerName());
@@ -108,7 +104,6 @@ public class BankingOperationsImpl implements BankingOperations {
 
 	@Override
 	public boolean creditTransaction(Integer accountNumber, Double amount) throws InterruptedException {
-		// TODO Auto-generated method stub
 		log.info("Begin creditTransaction");
 		boolean statusFlag=false;
 		BankAccount bankAccount = bankDBStore.get(accountNumber);
@@ -124,7 +119,6 @@ public class BankingOperationsImpl implements BankingOperations {
 
 	@Override
 	public boolean debitTransaction(Integer accountNumber, Double amount) throws InterruptedException, CGIBankOperationException {
-		// TODO Auto-generated method stub
 		log.info("Begin debitTransaction");
 		boolean statusFlag=false;
 		BankAccount bankAccount = bankDBStore.get(accountNumber);
@@ -141,7 +135,6 @@ public class BankingOperationsImpl implements BankingOperations {
 
 	@Override
 	public List<Transaction> transactionHistory(Integer accountNumber) {
-		// TODO Auto-generated method stub
 		log.info("Begin transactionHistory");
 		boolean statusFlag=false;
 		List<Transaction> listTransactions=null;

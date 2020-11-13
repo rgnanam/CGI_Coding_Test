@@ -14,6 +14,5 @@ public interface Constants {
 	String DEBIT_TRANSACTION_FAILED_MSG="Debit transaction is failed";
 	String DEBIT = "DEBIT";
 	String CGIE301="CGIE301";
-
-
+	String CGIE300 = "CGIE300";
 }
