@@ -40,14 +40,12 @@ public class BankAccount {
 		if(lock.tryLock(5,TimeUnit.SECONDS)){
 			try{
 				balance = balance +amount;
-				Transaction transaction = new Transaction();
-				transaction.setTransactionId(CommonUtility.generateTransactionID(Constants.CREDIT));
-				transaction.setAccountNumber(accountNumber);
-				transaction.setAmount(amount);
-				transaction.setCreatedTime(LocalDateTime.now());
-				transaction.setTransactionType(Constants.CREDIT);
-				transaction.setBalance(balance);
-				addTransaction(transaction);
+				addTransaction(new Transaction(CommonUtility.generateTransactionID(Constants.CREDIT),
+						Constants.CREDIT,
+						accountNumber,
+						amount,
+						balance,
+						LocalDateTime.now()));
 				status=true;
 				log.info(amount+" credited into account"+accountNumber+" successfully");
 			}finally{
@@ -71,14 +69,12 @@ public class BankAccount {
 			try{
 				if(balance > amount){
 					balance = balance-amount;
-					Transaction transaction = new Transaction();
-					transaction.setTransactionId(CommonUtility.generateTransactionID(Constants.DEBIT));
-					transaction.setAccountNumber(accountNumber);
-					transaction.setAmount(amount);
-					transaction.setCreatedTime(LocalDateTime.now());
-					transaction.setTransactionType(Constants.DEBIT);
-					transaction.setBalance(balance);
-					addTransaction(transaction);
+					addTransaction(new Transaction(CommonUtility.generateTransactionID(Constants.DEBIT),
+							Constants.DEBIT,
+							accountNumber,
+							amount,
+							balance,
+							LocalDateTime.now()));
 					status=true;
 					log.debug(amount+" debited into account"+accountNumber+" successfully");
 				}else{

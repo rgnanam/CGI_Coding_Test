@@ -15,7 +15,7 @@ public class CgiTestApplication implements CommandLineRunner {
 	}
 
 	@Override
-	//It will be used to perform initialization, it will be invoked at application startup
+	//It will be used to perform initialization, it will be invoked at startup
 	public void run(String... args) throws Exception {
 		// it will be used for initialization
 	}

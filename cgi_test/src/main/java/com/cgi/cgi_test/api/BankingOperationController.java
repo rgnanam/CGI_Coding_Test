@@ -18,7 +18,7 @@ import com.cgi.cgi_test.dto.AccountRequest;
 import com.cgi.cgi_test.dto.AccountResponse;
 import com.cgi.cgi_test.dto.Transaction;
 import com.cgi.cgi_test.exception.CGIBankOperationException;
-import com.cgi.cgi_test.service.BankingOperation;
+import com.cgi.cgi_test.service.BankingOperations;
 
 @RestController
 @RequestMapping("/rest/api/v1/bank/account-management")
@@ -26,39 +26,39 @@ import com.cgi.cgi_test.service.BankingOperation;
 public class BankingOperationController {
 	
 	@Autowired
-	BankingOperation bankingOperation;
+	BankingOperations bankingOperations;
 	
 	@PostMapping(value="/managed-accounts",consumes={MediaType.APPLICATION_JSON_VALUE},produces={MediaType.APPLICATION_JSON_VALUE})
 	public String createAccount(@Validated @RequestBody AccountRequest bankingRequest){
 		
-		return bankingOperation.createAccount(bankingRequest)?String.format(Constants.ACCOUNT_CREATED_MSG,bankingRequest.getBankAccountNumber()):Constants.ACCOUNT_NOTCREATED_MSG;
+		return bankingOperations.createAccount(bankingRequest)?String.format(Constants.ACCOUNT_CREATED_MSG,bankingRequest.getBankAccountNumber()):Constants.ACCOUNT_NOTCREATED_MSG;
 		
 	}
 	@GetMapping(value={"/managed-accounts/{id}","/managed-accounts"},produces={MediaType.APPLICATION_JSON_VALUE})
 	public List<AccountResponse> getAccount(@PathVariable(required = false) Integer id) throws CGIBankOperationException{
 		
-		return bankingOperation.getAccount(id);
+		return bankingOperations.getAccount(id);
 		
 	}
 	
 	@PostMapping(value="/managed-accounts/{id}/credit/{amount}",produces={MediaType.APPLICATION_JSON_VALUE})
 	public String createCreditTransaction(@PathVariable Integer id,@PathVariable Double amount) throws CGIBankOperationException, InterruptedException{
 		
-		return bankingOperation.creditTransaction(id, amount)?String.format(Constants.CREDIT_TRANSACTION_CREATED_MSG,amount,id):Constants.CREDIT_TRANSACTION_FAILED_MSG;
+		return bankingOperations.creditTransaction(id, amount)?String.format(Constants.CREDIT_TRANSACTION_CREATED_MSG,amount,id):Constants.CREDIT_TRANSACTION_FAILED_MSG;
 		
 	}
 	
 	@PostMapping(value="/managed-accounts/{id}/debit/{amount}",produces={MediaType.APPLICATION_JSON_VALUE})
 	public String createDebitTransaction(@PathVariable Integer id,@PathVariable Double amount) throws CGIBankOperationException, InterruptedException{
 		
-		return bankingOperation.debitTransaction(id, amount)?String.format(Constants.DEBIT_TRANSACTION_CREATED_MSG,amount,id):Constants.DEBIT_TRANSACTION_FAILED_MSG;
+		return bankingOperations.debitTransaction(id, amount)?String.format(Constants.DEBIT_TRANSACTION_CREATED_MSG,amount,id):Constants.DEBIT_TRANSACTION_FAILED_MSG;
 		
 	}
 	
 	@GetMapping(value="/managed-accounts/{id}/transactions",produces={MediaType.APPLICATION_JSON_VALUE})
 	public List<Transaction> getALLTransactions(@PathVariable(required = false) Integer id) throws CGIBankOperationException{
 		
-		return bankingOperation.transactionHistory(id);
+		return bankingOperations.transactionHistory(id);
 		
 	}
 	

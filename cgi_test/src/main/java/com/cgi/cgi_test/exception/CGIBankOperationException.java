@@ -1,17 +1,13 @@
 package com.cgi.cgi_test.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class CGIBankOperationException extends Exception{
-	String errorCode;
-	String errorMsg;
-	public CGIBankOperationException(String errorCode, String errorMsg) {
-		super();
-		this.errorCode = errorCode;
-		this.errorMsg = errorMsg;
-	}
-
+	private String errorCode;
+	private String errorMsg;
 }
