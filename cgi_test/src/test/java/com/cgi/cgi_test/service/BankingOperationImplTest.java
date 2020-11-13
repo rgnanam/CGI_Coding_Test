@@ -14,13 +14,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,8 +24,9 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 class BankingOperationImplTest {
+
     @InjectMocks
-    BankingOperationImpl bankingOperation = new BankingOperationImpl();
+    BankingOperationImpl bankingOperation;
     @Mock
     BankingDBStore bankDBStore;
 

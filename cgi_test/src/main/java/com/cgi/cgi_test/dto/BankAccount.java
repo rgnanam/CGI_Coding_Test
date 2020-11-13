@@ -82,8 +82,9 @@ public class BankAccount {
 					status=true;
 					log.debug(amount+" debited into account"+accountNumber+" successfully");
 				}else{
-					log.error(amount+" not debited into account"+accountNumber+" due to insufficient balance");
-					throw new CGIBankOperationException(Constants.CGIE301, amount+" not debited into account"+accountNumber+" due to insufficient balance");
+					String errorMessage =amount+" not debited into account"+accountNumber+" due to insufficient balance";
+					log.error(errorMessage);
+					throw new CGIBankOperationException(Constants.CGIE301, errorMessage);
 				}
 			}finally{
 				lock.unlock();

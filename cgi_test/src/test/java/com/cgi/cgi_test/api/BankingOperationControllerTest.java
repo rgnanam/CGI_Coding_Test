@@ -1,5 +1,4 @@
 package com.cgi.cgi_test.api;
-
 import com.cgi.cgi_test.CgiTestApplication;
 import com.cgi.cgi_test.common.Constants;
 import com.cgi.cgi_test.dto.AccountRequest;
@@ -44,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         private BankingOperation bankingOperation;
 
         @BeforeEach
-        void setUp() {
+        public void setUp() {
         }
 
         @Test
@@ -77,7 +76,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         }
 
         @Test
-        void createAccountWithOutCustomerName() throws Exception {
+        public void createAccountWithOutCustomerName() throws Exception {
             AccountRequest accountRequest = new AccountRequest();
             accountRequest.setBankAccountNumber(100);
             //accountRequest.setCustomerName("Gnanasekaran Raja");
@@ -93,7 +92,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
         @Test
-    void getAccount() throws Exception {
+        public void getAccount() throws Exception {
 
             when(bankingOperation.getAccount(any()))
                     .thenReturn(createAccountResponse());
@@ -107,7 +106,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     }
 
         @Test
-        void getAllAccount() throws Exception {
+        public void getAllAccount() throws Exception {
 
             when(bankingOperation.getAccount(any()))
                     .thenReturn(createAccountResponseListWithMultipleAccounts());
@@ -148,7 +147,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         }
 
         @Test
-    void createCreditTransaction() throws Exception {
+   public void createCreditTransaction() throws Exception {
 
             when(bankingOperation.creditTransaction(any(),anyDouble()))
                     .thenReturn(Boolean.TRUE);
@@ -158,7 +157,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     }
 
     @Test
-    void createDebitTransaction() throws Exception {
+    public void createDebitTransaction() throws Exception {
         when(bankingOperation.debitTransaction(any(),anyDouble()))
                 .thenReturn(Boolean.TRUE);
         this.mockMvc.perform(post("/rest/api/v1/bank/account-management/managed-accounts/{id}/debit/{amount}",100,100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -167,9 +166,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     }
 
     @Test
-    void getALLTransactions() throws Exception{
+    public void getALLTransactions() throws Exception{
         when(bankingOperation.transactionHistory(any()))
-                .thenReturn(CreateTransactionList());
+                .thenReturn(createTransactionList());
         MvcResult result = this.mockMvc.perform(get("/rest/api/v1/bank/account-management/managed-accounts/{id}/transactions",100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -178,7 +177,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
     }
 
-        private List<Transaction> CreateTransactionList() {
+        private List<Transaction> createTransactionList() {
             List<Transaction> transactionList = new ArrayList<>();
             Transaction transaction = new Transaction();
             transaction.setAccountNumber(100);

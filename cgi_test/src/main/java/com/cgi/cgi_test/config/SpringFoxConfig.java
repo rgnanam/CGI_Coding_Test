@@ -15,22 +15,13 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import static springfox.documentation.builders.PathSelectors.regex;
 
 @Configuration
 @EnableSwagger2
 public class SpringFoxConfig {
     public static final String STRING="string";
     public static final String HEADER="header";
-   // String pattern = "/{id/}";
-
-    //private final List<Predicate<String>> paths =
-      //      Arrays.asList(regex("/rest/api/v1/bank/account-management/managed-accounts/{id}*"),
-        //            regex("/rest/api/v1/bank/account-management/managed-accounts*")
-          //  );
-
     @Bean
     public Docket apiDocket() {
 
