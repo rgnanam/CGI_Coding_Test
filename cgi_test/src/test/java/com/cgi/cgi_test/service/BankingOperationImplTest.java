@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 class BankingOperationImplTest {
-
     @InjectMocks
     BankingOperationImpl bankingOperation = new BankingOperationImpl();
     @Mock
