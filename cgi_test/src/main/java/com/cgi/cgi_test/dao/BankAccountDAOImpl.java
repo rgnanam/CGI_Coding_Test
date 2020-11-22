@@ -1,7 +1,6 @@
 package com.cgi.cgi_test.dao;
 
 import com.cgi.cgi_test.dto.BankAccount;
-import com.cgi.cgi_test.dto.Customer;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

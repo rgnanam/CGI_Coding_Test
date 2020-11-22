@@ -1,6 +1,5 @@
 package com.cgi.cgi_test.integration;
 
-import com.cgi.cgi_test.common.Constants;
 import com.cgi.cgi_test.dao.Dao;
 import com.cgi.cgi_test.dto.BankAccount;
 import com.cgi.cgi_test.dto.Customer;

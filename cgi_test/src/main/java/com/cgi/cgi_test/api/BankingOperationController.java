@@ -1,8 +1,6 @@
 package com.cgi.cgi_test.api;
 
 import java.util.List;
-
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -44,14 +42,6 @@ public class BankingOperationController {
 		return bankingOperations.getAccount(id);
 		
 	}
-	
-	/*@PostMapping(value="/managed-accounts/{id}/credit/{amount}",produces={MediaType.APPLICATION_JSON_VALUE})
-	public String createCreditTransaction(@PathVariable Integer id,@PathVariable Double amount) throws CGIBankOperationException, InterruptedException{
-		
-		return bankingOperations.creditTransaction(id, amount)?String.format(Constants.CREDIT_TRANSACTION_CREATED_MSG,amount,id):Constants.CREDIT_TRANSACTION_FAILED_MSG;
-		
-	}*/
-	
 	@PostMapping(value="/managed-accounts/{id}/transaction/{type}/{amount}",produces={MediaType.APPLICATION_JSON_VALUE})
 	public Transaction createTransaction(@PathVariable Integer id,@PathVariable String type,@PathVariable Double amount) throws CGIBankOperationException, InterruptedException{
 		log.debug("create transaction for Account# "+id+" TransactionType = "+type+" Amount = "+amount);

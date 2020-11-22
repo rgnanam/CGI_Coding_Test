@@ -1,9 +1,6 @@
 package com.cgi.cgi_test.exception;
 
-
-
 import java.util.List;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
@@ -35,6 +32,15 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler({CGIBankOperationException.class})
     public ResponseEntity<Object> handleCGIException(final CGIBankOperationException exception) {
+
+        return new ResponseEntity<Object>(
+                new ExceptionInfo(exception.getErrorCode(), exception.getErrorMsg()),
+                new HttpHeaders(),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({CGIDBIntegrationException.class})
+    public ResponseEntity<Object> handleCGIException(final CGIDBIntegrationException exception) {
 
         return new ResponseEntity<Object>(
                 new ExceptionInfo(exception.getErrorCode(), exception.getErrorMsg()),

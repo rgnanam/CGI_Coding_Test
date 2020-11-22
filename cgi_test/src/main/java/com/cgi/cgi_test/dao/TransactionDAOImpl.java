@@ -1,9 +1,7 @@
 package com.cgi.cgi_test.dao;
 
-import com.cgi.cgi_test.dto.Customer;
 import com.cgi.cgi_test.dto.Transaction;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
