@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<Object>(
                 new ExceptionInfo(exception.getErrorCode(), exception.getErrorMsg()),
                 new HttpHeaders(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})

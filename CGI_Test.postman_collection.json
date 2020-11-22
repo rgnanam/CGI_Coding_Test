@@ -23,7 +23,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"bankAccountNumber\":100,\r\n    \"customerName\":\"Gnanasekaran Raja\",\r\n    \"initialBalance\":1000\r\n}",
+					"raw": "{\r\n    \"bankAccountNumber\":100,\r\n    \"customerName\":\"Gnanasekaran Raja1\",\r\n    \"initialBalance\":1000\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -180,7 +180,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/1000/credit/3000",
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/100/transaction/credit/3000",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -193,7 +193,8 @@
 						"bank",
 						"account-management",
 						"managed-accounts",
-						"1000",
+						"100",
+						"transaction",
 						"credit",
 						"3000"
 					]
@@ -213,7 +214,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/1000/debit/100",
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/100/transaction/debit/100",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -226,8 +227,43 @@
 						"bank",
 						"account-management",
 						"managed-accounts",
-						"1000",
+						"100",
+						"transaction",
 						"debit",
+						"100"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "InValidTransactionType",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/100/transaction/CREDIT100/100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"bank",
+						"account-management",
+						"managed-accounts",
+						"100",
+						"transaction",
+						"CREDIT100",
 						"100"
 					]
 				}
@@ -266,7 +302,7 @@
 			"response": []
 		},
 		{
-			"name": "GetAllAccount Copy",
+			"name": "GetAccount",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -277,7 +313,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/",
+					"raw": "http://localhost:8080/rest/api/v1/bank/account-management/managed-accounts/100",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -290,7 +326,7 @@
 						"bank",
 						"account-management",
 						"managed-accounts",
-						""
+						"100"
 					]
 				}
 			},

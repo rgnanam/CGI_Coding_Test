@@ -1,5 +1,6 @@
 package com.cgi.cgi_test.api;
 import com.cgi.cgi_test.CgiTestApplication;
+import com.cgi.cgi_test.common.CommonUtility;
 import com.cgi.cgi_test.common.Constants;
 import com.cgi.cgi_test.dto.AccountRequest;
 import com.cgi.cgi_test.dto.AccountResponse;
@@ -7,6 +8,7 @@ import com.cgi.cgi_test.dto.Transaction;
 import com.cgi.cgi_test.service.BankingOperations;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,9 +44,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
         @MockBean
         private BankingOperations bankingOperations;
+        ObjectMapper objectMapper;
 
         @BeforeEach
         public void setUp() {
+            objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
         }
 
         @Test
@@ -62,10 +69,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         @Test
         public void testCreateAccountWithOutAccountNumber() throws Exception {
             AccountRequest accountRequest = new AccountRequest();
-            //accountRequest.setBankAccountNumber(100);
             accountRequest.setCustomerName("Gnanasekaran Raja");
             accountRequest.setInitialBalance(1000.0);
-            ObjectMapper objectMapper = new ObjectMapper();
             String request =objectMapper.writeValueAsString( accountRequest);
             when(bankingOperations.createAccount(any()))
                     .thenReturn(Boolean.TRUE);
@@ -80,7 +85,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
             accountRequest.setBankAccountNumber(100);
             //accountRequest.setCustomerName("Gnanasekaran Raja");
             accountRequest.setInitialBalance(1000.0);
-            ObjectMapper objectMapper = new ObjectMapper();
             String request =objectMapper.writeValueAsString( accountRequest);
             when(bankingOperations.createAccount(any()))
                     .thenReturn(Boolean.TRUE);
@@ -95,7 +99,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
             when(bankingOperations.getAccount(any()))
                     .thenReturn(createAccountResponse());
-            ObjectMapper objectMapper = new ObjectMapper();
             MvcResult result= this.mockMvc.perform(get("/rest/api/v1/bank/account-management/managed-accounts").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).param("id","100"))
                     .andDo(print()).andExpect(status().isOk()).andReturn();
             List<AccountResponse> accountResponseList = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<AccountResponse>>(){});
@@ -109,7 +112,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
             when(bankingOperations.getAccount(any()))
                     .thenReturn(createAccountResponseListWithMultipleAccounts());
-            ObjectMapper objectMapper = new ObjectMapper();
             MvcResult result= this.mockMvc.perform(get("/rest/api/v1/bank/account-management/managed-accounts").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                     .andDo(print()).andExpect(status().isOk()).andReturn();
             List<AccountResponse> accountResponseList = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<AccountResponse>>(){});
@@ -149,20 +151,44 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         public void testCreateCreditTransactionWithHappyPath() throws Exception {
 
             when(bankingOperations.creditTransaction(any(),anyDouble()))
-                    .thenReturn(Boolean.TRUE);
-            this.mockMvc.perform(post("/rest/api/v1/bank/account-management/managed-accounts/{id}/credit/{amount}",100,100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                    .andDo(print()).andExpect(status().isOk()).andExpect(content()
-                    .string(containsString("successfully")));
+                    .thenReturn(createTransaction());
+            MvcResult result = this.mockMvc.perform(post("/rest/api/v1/bank/account-management/managed-accounts/{id}/transaction/credit/{amount}",100,100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                    .andDo(print()).andExpect(status().isOk()).andReturn();
+            Transaction transaction = objectMapper.readValue(result.getResponse().getContentAsString(), Transaction.class);
+            Assert.assertEquals(100,transaction.getAccountNumber(),0.0);
+            Assert.assertEquals(1000,transaction.getBalance(),0.0);
     }
 
-    @Test
+        private Transaction createTransaction() {
+            return new Transaction(CommonUtility.generateTransactionID(Constants.CREDIT),
+                    Constants.CREDIT,
+                    100,
+                    1000.0,
+                    1000.0,
+                    LocalDateTime.now(),
+                    Constants.SUCCESS);
+
+        }
+
+        @Test
     public void testCreateDebitTransactionWithHappyPath() throws Exception {
         when(bankingOperations.debitTransaction(any(),anyDouble()))
-                .thenReturn(Boolean.TRUE);
-        this.mockMvc.perform(post("/rest/api/v1/bank/account-management/managed-accounts/{id}/debit/{amount}",100,100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().isOk()).andExpect(content()
-                .string(containsString("successfully")));
+                .thenReturn(createTransaction());
+        MvcResult result = this.mockMvc.perform(post("/rest/api/v1/bank/account-management/managed-accounts/{id}/transaction/debit/{amount}",100,100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
+            Transaction transaction = objectMapper.readValue(result.getResponse().getContentAsString(), Transaction.class);
+            Assert.assertEquals(100,transaction.getAccountNumber(),0.0);
+            Assert.assertEquals(1000,transaction.getBalance(),0.0);
     }
+
+        @Test
+        public void testCreateDebitTransactionWithInvalidTransactionType() throws Exception {
+            when(bankingOperations.debitTransaction(any(),anyDouble()))
+                    .thenReturn(createTransaction());
+            this.mockMvc.perform(post("/rest/api/v1/bank/account-management/managed-accounts/{id}/transaction/deb/{amount}",100,100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                    .andDo(print()).andExpect(status().isBadRequest()).andExpect(content()
+                    .string(containsString("CGIE302")));
+        }
 
     @Test
     public void testGetAllTransactionsWithHappyPath() throws Exception{
@@ -170,7 +196,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 .thenReturn(createTransactionList());
         MvcResult result = this.mockMvc.perform(get("/rest/api/v1/bank/account-management/managed-accounts/{id}/transactions",100).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
-        ObjectMapper objectMapper = new ObjectMapper();
         List<Transaction> transactionList = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<Transaction>>(){});
         Assert.assertTrue(transactionList.size()>=1);
 

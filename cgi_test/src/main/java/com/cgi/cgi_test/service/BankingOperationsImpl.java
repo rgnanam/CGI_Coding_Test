@@ -5,16 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.cgi.cgi_test.api.queue.TransactionWaitingQueue;
 import com.cgi.cgi_test.common.CommonUtility;
+import com.cgi.cgi_test.dto.*;
+import com.cgi.cgi_test.integration.DbIntegrationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgi.cgi_test.cachedb.BankingDBStore;
 import com.cgi.cgi_test.common.Constants;
-import com.cgi.cgi_test.dto.AccountRequest;
-import com.cgi.cgi_test.dto.AccountResponse;
-import com.cgi.cgi_test.dto.BankAccount;
-import com.cgi.cgi_test.dto.Transaction;
 import com.cgi.cgi_test.exception.CGIBankOperationException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,35 +24,50 @@ public class BankingOperationsImpl implements BankingOperations {
 	
 
 	@Autowired
-	BankingDBStore bankDBStore;
+	DbIntegrationFacade dbIntegrationFacade;
+
+	@Autowired
+	TransactionWaitingQueue transactionWaitingQueue;
+
 
 	@Override
 	public boolean createAccount(AccountRequest bankingRequest) {
 		log.info("Begin createAccount");
 		boolean flag= false;
 		try{
-		BankAccount bankAccount = createBankAccount(bankingRequest);
-		Transaction transaction = createTransaction(bankingRequest,Constants.CREDIT);
-		bankAccount.addTransaction(transaction);
-		bankDBStore.createOrUpdate(bankAccount);
-		log.info("Account# "+bankAccount.getAccountNumber()+" Bank account is created successfully");
-		flag=true;
+			Customer customer = createCustomer(bankingRequest);
+			BankAccount bankAccount = createBankAccount(bankingRequest);
+			Transaction transaction = createTransaction(bankingRequest,Constants.CREDIT);
+			dbIntegrationFacade.save(customer,bankAccount,transaction);
+			log.debug("Transaction Object is created ->"+transaction);
+			log.debug("bankAccount Object is created ->"+bankAccount);
+			log.debug("Customer Object is created ->"+customer);
+			log.debug("Account# "+bankAccount.getAccountNumber()+" Bank account is created successfully");
+			flag=true;
 		}catch(Exception e){
 			log.error(e.getMessage());
-			// create Email notification
-			
+			// implement Email notification
 		}
 		log.info("End createAccount");
 		return flag;
 		
 	}
-	
+
+	private Customer createCustomer(AccountRequest bankingRequest) {
+		Customer customer = new Customer();
+		customer.setCustomerId(CommonUtility.generateCustomerID());
+		customer.setName(bankingRequest.getCustomerName());
+		customer.setAadharNumber(0000);
+		customer.setPanNumber("XXXXXXX");
+		return customer;
+	}
+
 	@Override
 	public List<AccountResponse> getAccount(Integer accountNumber) throws CGIBankOperationException {
 		log.info("Begin getAccount");
 		List<AccountResponse> listAccountResponse = new ArrayList<>();
 		if(accountNumber != null){
-			BankAccount bankAccount = bankDBStore.get(accountNumber);
+			BankAccount bankAccount = dbIntegrationFacade.getAccountByNumber(accountNumber);
 			if(bankAccount != null){
 				listAccountResponse.add(createAccountResponse(bankAccount));
 				return listAccountResponse;
@@ -64,19 +77,40 @@ public class BankingOperationsImpl implements BankingOperations {
 				throw new CGIBankOperationException(Constants.CGIE300,errorMsg);
 			}
 		}else{
-			listAccountResponse = bankDBStore.getAll().stream().map(account->createAccountResponse(account)).collect(Collectors.toList());
+			listAccountResponse = dbIntegrationFacade.getAllAccounts().stream().map(account->createAccountResponse(account)).collect(Collectors.toList());
 		}
 		log.info("End getAccount");
 		return listAccountResponse;
 		
 	}
 
+	@Override
+	public void updateTransaction(Transaction transaction) {
+		BankAccount bankAccount = dbIntegrationFacade.getBankAccount(transaction);
+		if(bankAccount !=null){
+			try {
+				Transaction updatedTransaction = bankAccount.updateTransaction(transaction);
+				if(updatedTransaction.getTransactionType().equalsIgnoreCase(Constants.IN_PROGRESS)){
+					if(transaction.getRetryCounter() <3){
+					updatedTransaction.incrementRetryCounter();
+					transactionWaitingQueue.add(transaction);
+					}
+					else {
+						updatedTransaction.setStatus(Constants.FAILED);
+					}
+				}
+				dbIntegrationFacade.save(bankAccount,transaction);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private AccountResponse createAccountResponse(BankAccount bankAccount) {
 		AccountResponse accountResponse= new AccountResponse();
 		accountResponse.setBankAccountNumber(bankAccount.getAccountNumber());
-		accountResponse.setCustomerName(bankAccount.getName());
+		accountResponse.setCustomerName(dbIntegrationFacade.getCustomerByAccountNumber(bankAccount.getAccountNumber()).getName());
 		accountResponse.setBalance(bankAccount.getBalance());
-		
 		return accountResponse;
 	}
 
@@ -88,64 +122,67 @@ public class BankingOperationsImpl implements BankingOperations {
 		transaction.setAmount(bankingRequest.getInitialBalance());
 		transaction.setBalance(bankingRequest.getInitialBalance());
 		transaction.setCreatedTime(LocalDateTime.now());
+		transaction.setStatus(Constants.SUCCESS);
 		
 		return transaction;
 	}
 
 	private BankAccount createBankAccount(AccountRequest bankingRequest) {
 		BankAccount bankAccount = new BankAccount();
+		bankAccount.setBankAccoundId(CommonUtility.generateAccountId());
 		bankAccount.setAccountNumber(bankingRequest.getBankAccountNumber());
-		bankAccount.setName(bankingRequest.getCustomerName());
 		bankAccount.setBalance(bankingRequest.getInitialBalance());
 		bankAccount.setCreatedTime(LocalDateTime.now());
+		bankAccount.setActiveFlag(true);
 		
 		return bankAccount;
 	}
 
 	@Override
-	public boolean creditTransaction(Integer accountNumber, Double amount) throws InterruptedException {
+	public Transaction creditTransaction(Integer accountNumber, Double amount) throws InterruptedException {
 		log.info("Begin creditTransaction");
-		boolean statusFlag=false;
-		BankAccount bankAccount = bankDBStore.get(accountNumber);
+		BankAccount bankAccount = dbIntegrationFacade.getAccountByNumber(accountNumber);
+		Transaction transaction=null;
 		if(bankAccount !=null){
-			statusFlag=bankAccount.creditTransaction(amount);
-			bankDBStore.createOrUpdate(bankAccount);
+			transaction =bankAccount.creditTransaction(amount);
+			dbIntegrationFacade.save(bankAccount,transaction);
+			if(transaction.getStatus().equalsIgnoreCase(Constants.IN_PROGRESS)){
+				transaction.incrementRetryCounter();
+				transactionWaitingQueue.add(transaction);
+			}
 		}else{
 			log.error(accountNumber+" is invalid account number");
 		}
 		log.info("End creditTransaction");
-		return statusFlag;
+		return transaction;
 	}
 
 	@Override
-	public boolean debitTransaction(Integer accountNumber, Double amount) throws InterruptedException, CGIBankOperationException {
+	public Transaction debitTransaction(Integer accountNumber, Double amount) throws InterruptedException, CGIBankOperationException {
 		log.info("Begin debitTransaction");
-		boolean statusFlag=false;
-		BankAccount bankAccount = bankDBStore.get(accountNumber);
+		BankAccount bankAccount = dbIntegrationFacade.getAccountByNumber(accountNumber);
+		Transaction transaction=null;
 		if(bankAccount !=null){
-			statusFlag=bankAccount.debitTransaction(amount);
-			bankDBStore.createOrUpdate(bankAccount);
+			transaction=bankAccount.debitTransaction(amount);
+			dbIntegrationFacade.save(bankAccount,transaction);
+			if(transaction.getStatus().equalsIgnoreCase(Constants.IN_PROGRESS)){
+				transaction.incrementRetryCounter();
+				transactionWaitingQueue.add(transaction);
+			}
 		}else{
 			log.error(accountNumber+" is invalid account number");
 		}
 		log.info("End debitTransaction");
-		return statusFlag;
+		return transaction;
 
 	}
 
 	@Override
 	public List<Transaction> transactionHistory(Integer accountNumber) {
 		log.info("Begin transactionHistory");
-		boolean statusFlag=false;
-		List<Transaction> listTransactions=null;
-		BankAccount bankAccount = bankDBStore.get(accountNumber);
-		if(bankAccount !=null){
-			listTransactions=bankAccount.getTransactionList();
-		}else{
-			log.error(accountNumber+" is invalid account number");
-		}
+		List<Transaction> allTransactions = dbIntegrationFacade.getAllTransactions(accountNumber);
 		log.info("End transactionHistory");
-		return listTransactions;
+		return allTransactions;
 		
 	}
 

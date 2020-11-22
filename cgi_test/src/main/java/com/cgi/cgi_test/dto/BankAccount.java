@@ -11,43 +11,50 @@ import com.cgi.cgi_test.common.CommonUtility;
 import com.cgi.cgi_test.common.Constants;
 import com.cgi.cgi_test.exception.CGIBankOperationException;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Setter
 @Slf4j
+@NoArgsConstructor
+@ToString
 public class BankAccount {
-	
+
+	private String bankAccoundId;
 	private Integer accountNumber;
-	private String name;
 	private Double balance;
 	private LocalDateTime createdTime;
 	private LocalDateTime modifiedTime;
-	private List<Transaction> transactionList = new ArrayList<>();
+	private boolean activeFlag;
+	private List<String> transactionIdList = new ArrayList<>();
 	private Lock lock = new ReentrantLock();
 	
-	public void addTransaction(Transaction transaction){
-		transactionList.add(transaction);
+	public void addTransaction(String transactionId){
+		transactionIdList.add(transactionId);
 	}
 	
 	// It is used for credit transaction
-	public boolean creditTransaction(Double amount) throws InterruptedException{
+	public Transaction creditTransaction(Double amount) throws InterruptedException{
 		log.info("Begin credit Transaction");
 		boolean status=false;
-		
+		Transaction transaction = new Transaction(CommonUtility.generateTransactionID(Constants.CREDIT),
+				Constants.CREDIT,
+				accountNumber,
+				amount,
+				balance,
+				LocalDateTime.now(),
+				Constants.IN_PROGRESS,
+				Constants.HIGHPRIORITY,
+				0);
 		if(lock.tryLock(5,TimeUnit.SECONDS)){
 			try{
-				balance = balance +amount;
-				addTransaction(new Transaction(CommonUtility.generateTransactionID(Constants.CREDIT),
-						Constants.CREDIT,
-						accountNumber,
-						amount,
-						balance,
-						LocalDateTime.now()));
+				balance = balance +transaction.getAmount();
+				transaction.setBalance(balance);
+				transaction.setStatus(Constants.SUCCESS);
 				status=true;
 				log.info(amount+" credited into account"+accountNumber+" successfully");
+				log.debug("Transaction("+ transaction +") is created successfully");
 			}finally{
 				lock.unlock();
 				log.info("Lock released");
@@ -57,26 +64,29 @@ public class BankAccount {
 		}
 		log.info("End credit Transaction");
 		
-		return status;
+		return transaction;
 	}
 	
 	// It is used for debit transaction
-	public boolean debitTransaction(Double amount) throws InterruptedException, CGIBankOperationException{
+	public Transaction debitTransaction(Double amount) throws InterruptedException, CGIBankOperationException{
 		log.info("Begin debit Transaction");
-		boolean status=false;
-		
+		Transaction transaction = new Transaction(CommonUtility.generateTransactionID(Constants.DEBIT),
+				Constants.DEBIT,
+				accountNumber,
+				amount,
+				balance,
+				LocalDateTime.now(),
+				Constants.IN_PROGRESS,
+				Constants.LOWPRIORITY,
+				0);;
 		if(lock.tryLock(5,TimeUnit.SECONDS)){
 			try{
 				if(balance > amount){
-					balance = balance-amount;
-					addTransaction(new Transaction(CommonUtility.generateTransactionID(Constants.DEBIT),
-							Constants.DEBIT,
-							accountNumber,
-							amount,
-							balance,
-							LocalDateTime.now()));
-					status=true;
-					log.debug(amount+" debited into account"+accountNumber+" successfully");
+					balance = balance-transaction.getAmount();
+					transaction.setBalance(balance);
+					transaction.setStatus(Constants.SUCCESS);
+					log.debug("Transaction("+transaction+") is created successfully");
+					log.info(amount+" debited into account"+accountNumber+" successfully");
 				}else{
 					String errorMessage =amount+" not debited into account"+accountNumber+" due to insufficient balance";
 					log.error(errorMessage);
@@ -91,7 +101,27 @@ public class BankAccount {
 		}
 		log.info("End debit Transaction");
 		
-		return status;
+		return transaction;
 		
+	}
+	public Transaction updateTransaction(Transaction transaction) throws InterruptedException {
+		if(transaction.getStatus().equalsIgnoreCase(Constants.IN_PROGRESS)){
+			if(lock.tryLock(5000,TimeUnit.MILLISECONDS))
+			{
+				try{
+					if(transaction.getTransactionType().equalsIgnoreCase(Constants.CREDIT)) {
+						balance = balance + transaction.getAmount();
+					}else{
+						balance = balance - transaction.getAmount();
+					}
+					transaction.setBalance(balance);
+					transaction.setStatus(Constants.SUCCESS);
+				}finally {
+					lock.unlock();
+				}
+
+			}
+		}
+		return transaction;
 	}
 }

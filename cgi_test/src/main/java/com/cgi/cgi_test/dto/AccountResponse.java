@@ -1,9 +1,6 @@
 package com.cgi.cgi_test.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -11,6 +8,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class AccountResponse implements Serializable {
 
 	private static final long serialVersionUID = 1281811858823667027L;

@@ -1,12 +1,11 @@
 package com.cgi.cgi_test.service;
 
 import com.cgi.cgi_test.cachedb.BankingDBStore;
+import com.cgi.cgi_test.common.CommonUtility;
 import com.cgi.cgi_test.common.Constants;
-import com.cgi.cgi_test.dto.AccountRequest;
-import com.cgi.cgi_test.dto.AccountResponse;
-import com.cgi.cgi_test.dto.BankAccount;
-import com.cgi.cgi_test.dto.Transaction;
+import com.cgi.cgi_test.dto.*;
 import com.cgi.cgi_test.exception.CGIBankOperationException;
+import com.cgi.cgi_test.integration.DbIntegrationFacade;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,30 +27,44 @@ class BankingOperationsImplTest {
     @InjectMocks
     BankingOperationsImpl bankingOperation;
     @Mock
-    BankingDBStore bankDBStore;
+    DbIntegrationFacade dbIntegrationFacade;
 
     @BeforeEach
     void setUp() {
         bankingOperation = new BankingOperationsImpl();
-        bankDBStore = mock(BankingDBStore.class);
-        ReflectionTestUtils.setField(bankingOperation, "bankDBStore", bankDBStore);
+        dbIntegrationFacade = mock(DbIntegrationFacade.class);
+        ReflectionTestUtils.setField(bankingOperation, "dbIntegrationFacade", dbIntegrationFacade);
 
-        when(bankDBStore.get(anyInt())).thenReturn(createBankAccount());
+        when(dbIntegrationFacade.getAccountByNumber(anyInt())).thenReturn(createBankAccount());
+        when(dbIntegrationFacade.getAllTransactions(anyInt())).thenReturn(createTransactionList());
+        when(dbIntegrationFacade.getCustomerByAccountNumber(anyInt())).thenReturn(createCustomer());
 
     }
 
-    private BankAccount createBankAccount() {
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber(100);
-        bankAccount.setName("Gnanasekaran");
-        bankAccount.setBalance(1000.0);
+    private Customer createCustomer() {
+        Customer customer = new Customer();
+        customer.setCustomerId(CommonUtility.generateCustomerID());
+        customer.setName("Gnanasekaran Raja");
+        customer.setPanNumber("XXXXXX");
+        return customer;
+    }
+
+    private List<Transaction> createTransactionList() {
+
         List<Transaction> transactionList = new ArrayList<>();
         Transaction transaction = new Transaction();
         transaction.setTransactionType(Constants.CREDIT);
         transaction.setBalance(1000.0);
         transaction.setAmount(100.0);
         transactionList.add(transaction);
-        bankAccount.setTransactionList(transactionList);
+        return transactionList;
+    }
+
+    private BankAccount createBankAccount() {
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber(100);
+        bankAccount.setBalance(1000.0);
+        bankAccount.addTransaction(CommonUtility.generateTransactionID(Constants.CREDIT));
         return bankAccount;
     }
 
@@ -73,14 +86,14 @@ class BankingOperationsImplTest {
 
     @Test
     public void testCreditTransactionWithHappyPath() throws InterruptedException {
-        boolean statusFlag = bankingOperation.creditTransaction(100,200.0);
-        Assert.assertTrue(statusFlag);
+        Transaction transaction = bankingOperation.creditTransaction(100,200.0);
+        Assert.assertNotNull(transaction);
     }
 
     @Test
     public void testDebitTransactionWithHappyPath() throws CGIBankOperationException, InterruptedException {
-        boolean statusFlag = bankingOperation.debitTransaction(100,200.0);
-        Assert.assertTrue(statusFlag);
+        Transaction transaction = bankingOperation.debitTransaction(100,200.0);
+        Assert.assertNotNull(transaction);
     }
 
     @Test

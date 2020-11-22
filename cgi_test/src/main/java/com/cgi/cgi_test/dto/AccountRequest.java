@@ -5,13 +5,15 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Setter
 @Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountRequest implements Serializable {
 
 	private static final long serialVersionUID = 1138427459680070403L;
