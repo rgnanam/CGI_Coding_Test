@@ -166,7 +166,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                     1000.0,
                     1000.0,
                     LocalDateTime.now(),
-                    Constants.SUCCESS);
+                    Constants.SUCCESS,
+                    Constants.HIGHPRIORITY,
+                    0);
 
         }
 

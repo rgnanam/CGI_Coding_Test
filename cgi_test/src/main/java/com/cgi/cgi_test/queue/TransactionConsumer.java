@@ -1,7 +1,6 @@
-package com.cgi.cgi_test.api.queue;
+package com.cgi.cgi_test.queue;
 
 import com.cgi.cgi_test.dto.Transaction;
-import com.cgi.cgi_test.integration.DbIntegrationFacade;
 import com.cgi.cgi_test.service.BankingOperations;
 import lombok.Getter;
 import lombok.Setter;

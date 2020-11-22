@@ -1,6 +1,5 @@
 package com.cgi.cgi_test.service;
 
-import com.cgi.cgi_test.cachedb.BankingDBStore;
 import com.cgi.cgi_test.common.CommonUtility;
 import com.cgi.cgi_test.common.Constants;
 import com.cgi.cgi_test.dto.*;

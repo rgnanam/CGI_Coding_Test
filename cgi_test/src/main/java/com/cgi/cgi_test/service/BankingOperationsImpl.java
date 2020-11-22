@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.cgi.cgi_test.api.queue.TransactionWaitingQueue;
+import com.cgi.cgi_test.queue.TransactionWaitingQueue;
 import com.cgi.cgi_test.common.CommonUtility;
 import com.cgi.cgi_test.dto.*;
 import com.cgi.cgi_test.integration.DbIntegrationFacade;
