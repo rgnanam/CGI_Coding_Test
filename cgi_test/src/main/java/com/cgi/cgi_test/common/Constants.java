@@ -22,4 +22,5 @@ public interface Constants {
 	String CGIE400 = "CGIE400";
 	Integer HIGHPRIORITY = 1;
 	Integer LOWPRIORITY = 2;
+    int MAX_RETRY = 3;
 }

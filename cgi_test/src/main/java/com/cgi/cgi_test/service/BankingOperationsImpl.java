@@ -91,12 +91,16 @@ public class BankingOperationsImpl implements BankingOperations {
 			try {
 				Transaction updatedTransaction = bankAccount.updateTransaction(transaction);
 				if(updatedTransaction.getTransactionType().equalsIgnoreCase(Constants.IN_PROGRESS)){
-					if(transaction.getRetryCounter() <3){
+					log.debug("Retry attempted ->"+transaction.getRetryCounter());
+					if(transaction.getRetryCounter() <Constants.MAX_RETRY){
 					updatedTransaction.incrementRetryCounter();
 					transactionWaitingQueue.add(transaction);
 					}
 					else {
+						log.debug("Exceedd maximum retry count ->"+transaction.getRetryCounter());
+						log.debug(updatedTransaction.toString());
 						updatedTransaction.setStatus(Constants.FAILED);
+						log.debug(updatedTransaction.toString());
 					}
 				}
 				dbIntegrationFacade.save(bankAccount,transaction);
@@ -123,6 +127,7 @@ public class BankingOperationsImpl implements BankingOperations {
 		transaction.setBalance(bankingRequest.getInitialBalance());
 		transaction.setCreatedTime(LocalDateTime.now());
 		transaction.setStatus(Constants.SUCCESS);
+		transaction.setPriority(Constants.HIGHPRIORITY);
 		
 		return transaction;
 	}

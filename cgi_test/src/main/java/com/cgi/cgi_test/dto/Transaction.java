@@ -3,6 +3,7 @@ package com.cgi.cgi_test.dto;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 @Getter
@@ -18,7 +19,9 @@ public class Transaction implements Comparable<Transaction> {
 	private Double  balance;
 	private LocalDateTime createdTime;
 	private String status;
+	@JsonIgnore
 	private Integer priority;
+	@JsonIgnore
 	private int retryCounter;
 
 	@Override
