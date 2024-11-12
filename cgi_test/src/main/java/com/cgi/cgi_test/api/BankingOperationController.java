@@ -44,7 +44,7 @@ public class BankingOperationController {
 	}
 	@PostMapping(value="/managed-accounts/{id}/transaction/{type}/{amount}",produces={MediaType.APPLICATION_JSON_VALUE})
 	public Transaction createTransaction(@PathVariable Integer id,@PathVariable String type,@PathVariable Double amount) throws CGIBankOperationException, InterruptedException{
-		log.debug("create transaction for Account# "+id+" TransactionType = "+type+" Amount = "+amount);
+		//log.debug("create transaction for Account# "+id+" TransactionType = "+type+" Amount = "+amount);
 		if(type.equalsIgnoreCase(Constants.DEBIT)) {
 			return bankingOperations.debitTransaction(id, amount);
 		}else if(type.equalsIgnoreCase(Constants.CREDIT)){
@@ -59,7 +59,7 @@ public class BankingOperationController {
 	
 	@GetMapping(value="/managed-accounts/{id}/transactions",produces={MediaType.APPLICATION_JSON_VALUE})
 	public List<Transaction> getALLTransactions(@PathVariable(required = false) Integer id) throws CGIBankOperationException{
-		log.debug("GetALLTransactions Account# "+id);
+		//log.debug("GetALLTransactions Account# "+id);
 		return bankingOperations.transactionHistory(id);
 		
 	}
