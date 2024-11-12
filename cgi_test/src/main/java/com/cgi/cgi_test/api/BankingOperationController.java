@@ -32,7 +32,7 @@ public class BankingOperationController {
 	
 	@PostMapping(value="/managed-accounts",consumes={MediaType.APPLICATION_JSON_VALUE},produces={MediaType.APPLICATION_JSON_VALUE})
 	public String createAccount(@Validated @RequestBody AccountRequest bankingRequest){
-		log.debug("AccountRequest ->"+bankingRequest);
+		//log.debug("AccountRequest ->"+bankingRequest);
 		return bankingOperations.createAccount(bankingRequest)?String.format(Constants.ACCOUNT_CREATED_MSG,bankingRequest.getBankAccountNumber()):Constants.ACCOUNT_NOTCREATED_MSG;
 		
 	}
